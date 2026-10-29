@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Городское такси</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f3f6;color:#222}
+header{background:#ffcc00;padding:22px 15px;text-align:center}
+header h1{margin:0;font-size:27px}
+header p{margin:8px 0 0}
+main{max-width:500px;margin:20px auto;padding:0 14px}
+.card{background:white;padding:20px;border-radius:16px;margin-bottom:16px;box-shadow:0 3px 12px #0001}
+h2{margin-top:0}
+button{border:0;border-radius:10px;padding:14px;width:100%;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px}
+.primary{background:#ffcc00;color:#222}
+.secondary{background:#222;color:white}
+input,select{width:100%;padding:13px;margin:7px 0 12px;border:1px solid #ccc;border-radius:9px;font-size:16px}
+label{font-weight:bold;font-size:14px}
+.order{border:1px solid #ddd;padding:13px;border-radius:10px;margin-top:12px}
+.hidden{display:none}
+.note{font-size:13px;color:#666;line-height:1.5}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🚕 Городское такси</h1>
+<p>Поездки по городу и за город</p>
+</header>
+
+<main>
+<div class="card">
+<h2>Кто вы?</h2>
+<button class="primary" onclick="showPage('passenger')">🙋 Я пассажир</button>
+<button class="secondary" onclick="showPage('driver')">🚗 Я водитель</button>
+</div>
+
+<section id="passenger" class="card hidden">
+<h2>Заказать такси</h2>
+<label>Ваше имя</label>
+<input id="pname" placeholder="Как вас зовут?">
+
+<label>Откуда забрать</label>
+<input id="from" placeholder="Адрес отправления">
+
+<label>Куда ехать</label>
+<input id="to" placeholder="Адрес назначения">
+
+<label>Телефон</label>
+<input id="phone" type="tel" placeholder="+7 ...">
+
+<button class="primary" onclick="makeOrder()">🚕 Заказать такси</button>
+<p id="result"></p>
+<button class="secondary" onclick="showPage('home')">Назад</button>
+</section>
+
+<section id="driver" class="card hidden">
+<h2>Кабинет водителя</h2>
+<label>Имя водителя</label>
+<input id="dname" placeholder="Ваше имя">
+
+<label>Номер автомобиля</label>
+<input id="car" placeholder="Например, 123 ABC 03">
+
+<button class="primary" onclick="showOrders()">Посмотреть заказы</button>
+<div id="orders"></div>
+<button class="secondary" onclick="showPage('home')">Назад</button>
+</section>
+
+<div id="home" class="card">
+<h2>Добро пожаловать!</h2>
+<p>Закажите поездку или войдите в режим водителя.</p>
+<p class="note">Это первая демонстрационная версия приложения.</p>
+</div>
+</main>
+
+<script>
+let orderList = [];
+
+function showPage(page){
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('passenger').classList.add('hidden');
+  document.getElementById('driver').classList.add('hidden');
+  document.getElementById(page).classList.remove('hidden');
+}
+
+function makeOrder(){
+  let name=document.getElementById('pname').value.trim();
+  let from=document.getElementById('from').value.trim();
+  let to=document.getElementById('to').value.trim();
+  let phone=document.getElementById('phone').value.trim();
+
+  if(!name||!from||!to||!phone){
+    alert('Заполните все поля');
+    return;
+  }
+
+  let order={
+    id:Date.now(),
+    name:name,
+    from:from,
+    to:to,
+    phone:phone,
+    status:'Ожидает водителя'
+  };
+
+  orderList.push(order);
+  document.getElementById('result').innerText=
+    'Заказ №'+order.id.toString().slice(-5)+
+    ' создан! Статус: '+order.status+
+    '. Пока заказ хранится только на этом устройстве.';
+}
+
+function showOrders(){
+  let box=document.getElementById('orders');
+  box.innerHTML='';
+
+  if(orderList.length===0){
+    box.innerHTML='<p>Пока заказов нет. В этой версии заказы видны только на текущем устройстве.</p>';
+    return;
+  }
+
+  orderList.forEach(function(o){
+    let div=document.createElement('div');
+    div.className='order';
+
+    let text=document.createElement('p');
+    text.textContent='Пассажир: '+o.name+
+      '\nОткуда: '+o.from+
+      '\nКуда: '+o.to+
+      '\nТелефон: '+o.phone+
+      '\nСтатус: '+o.status;
+    text.style.whiteSpace='pre-line';
+    div.appendChild(text);
+
+    if(o.status==='Ожидает водителя'){
+      let btn=document.createElement('button');
+      btn.className='primary';
+      btn.textContent='Принять заказ';
+      btn.onclick=function(){
+        o.status='Принят водителем';
+        showOrders();
+      };
+      div.appendChild(btn);
+    }
+
+    box.appendChild(div);
+  });
+}
+</script>
+
+</body>
+  </html>
